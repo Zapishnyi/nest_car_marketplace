@@ -9,12 +9,9 @@ export class CarModelEntity extends BaseModel {
   @Column('text')
   name: string;
 
-  // @Column('text')
-  // brand: string;
   @ManyToOne(() => CarBrandEntity, (entity) => entity.models, {
-    // onDelete: 'CASCADE',
+    onDelete: 'CASCADE',
   })
-  // @JoinColumn({ name: 'brand' })
   brand: CarBrandEntity;
 
   @OneToMany(() => CarEntity, (entity) => entity.model)
