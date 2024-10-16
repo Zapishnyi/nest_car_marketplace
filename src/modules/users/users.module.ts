@@ -4,6 +4,7 @@ import { AuthModule } from '../auth/auth.module';
 import { AwsStorageModule } from '../aws-storage/aws-storage.module';
 import { CarBrandModelModule } from '../car-brand-model/car-brand-model.module';
 import { LocationModule } from '../location/location.module';
+import { MailModule } from '../mailer/mail.module';
 import { RepositoryModule } from '../repository/repository.module';
 import { AdminController } from './controllers/admin.controller';
 import { ManagerController } from './controllers/manager.controller';
@@ -18,6 +19,7 @@ import { UsersService } from './services/users.service';
     RepositoryModule,
     CarBrandModelModule,
     LocationModule,
+    MailModule,
   ],
   controllers: [UsersController, AdminController, ManagerController],
   providers: [UsersService, UserPresenterService],

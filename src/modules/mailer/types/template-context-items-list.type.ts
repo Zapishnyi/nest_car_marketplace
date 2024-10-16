@@ -4,4 +4,7 @@ export type TemplateContextItemsListType = {
   api_docs_url?: string;
   user_id?: string;
   car_id?: string;
+  model?: string;
+  brand?: string;
+  message?: string;
 };

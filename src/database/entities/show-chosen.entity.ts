@@ -1,13 +1,23 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-import { BaseModel } from './base_model/base.model';
 import { CarEntity } from './car.entity';
 
 @Entity('show_chosen')
-export class ShowChosenEntity extends BaseModel {
+export class ShowChosenEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @Column('text', { unique: true })
   car_id: string;
 
+  @CreateDateColumn()
+  created: Date;
   @ManyToOne(() => CarEntity, (entity) => entity.shows_chosen, {
     onDelete: 'CASCADE',
   })

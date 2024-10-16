@@ -15,4 +15,12 @@ export class CarResDto {
   public readonly currency_initial: CurrencyEnum;
   public readonly price_calculated?: number;
   public readonly currency_requested?: CurrencyEnum;
+  public readonly location_city?: string;
+  public readonly location_region?: string;
+  public readonly location_country?: string;
+  public readonly owner_id?: string;
+  public readonly owner_first_name?: string;
+  public readonly owner_last_name?: string;
+  public readonly owner_email?: string;
+  public readonly owner_phone?: string;
 }

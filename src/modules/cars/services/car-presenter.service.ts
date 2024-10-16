@@ -3,17 +3,17 @@ import { ConfigService } from '@nestjs/config';
 
 import { AwsConfig, EnvConfigType } from '../../../configs/envConfigType';
 import { CarEntity } from '../../../database/entities/car.entity';
-import { CarQueryReqDto } from '../dto/req/car-query.req.dto';
+import { CarsQueryReqDto } from '../dto/req/cars-query.req.dto';
 import { CarResDto } from '../dto/res/car.res.dto';
 import { CarCreateResDto } from '../dto/res/car-create.res.dto';
 import { CarListResDto } from '../dto/res/car-list.res.dto';
-import { ICarRaw } from '../interfaces/ICarRaw.interface';
+import { ICarWithTotalRaw } from '../interfaces/ICarWithTotalRaw.interface';
 
 @Injectable()
 export class CarPresenterService {
   constructor(private readonly configService: ConfigService<EnvConfigType>) {}
 
-  public RawToResponseDto(raw: ICarRaw): CarResDto {
+  public RawToResponseDto(raw: ICarWithTotalRaw): CarResDto {
     const awsConfig = this.configService.get<AwsConfig>('aws');
     return {
       id: raw.car_id,
@@ -29,6 +29,14 @@ export class CarPresenterService {
       currency_initial: raw.car_currency,
       price_calculated: Number(raw.car_price_calculated.toFixed(2)),
       currency_requested: raw.car_currency_final,
+      location_city: raw.location_city,
+      location_region: raw.location_region,
+      location_country: raw.location_country,
+      owner_id: raw.user_id,
+      owner_first_name: raw.user_first_name,
+      owner_last_name: raw.user_last_name,
+      owner_email: raw.user_email,
+      owner_phone: raw.user_phone,
     };
   }
 
@@ -47,7 +55,7 @@ export class CarPresenterService {
   }
 
   public toResponseListDto(
-    [carRaw, total]: [ICarRaw[], number],
+    [carRaw, total]: [ICarWithTotalRaw[], number],
     {
       limit,
       page,
@@ -64,7 +72,7 @@ export class CarPresenterService {
       build_max,
       mileage_min,
       mileage_max,
-    }: CarQueryReqDto,
+    }: CarsQueryReqDto,
   ): CarListResDto {
     return {
       data: carRaw.map((carRaw) => this.RawToResponseDto(carRaw)),

@@ -13,11 +13,15 @@ import { AuthService } from '../../auth/services/auth.service';
 import { AuthAccessService } from '../../auth/services/auth-access.service';
 import { FileContentTypeEnum } from '../../aws-storage/enums/file-content-type.enum';
 import { AwsStorageService } from '../../aws-storage/services/aws-storage.service';
+import { EmailTypeEnum } from '../../mailer/enums/email-type.enum';
+import { MailService } from '../../mailer/services/mail.service';
 import { UserRepository } from '../../repository/services/user-repository.service';
 import { GetUsersQueryReqDto } from '../dto/req/get-users-query.req.dto';
+import { MessageToManagerReqDto } from '../dto/req/message-to-manager.req.dto';
 import { UserSelfCreateReqDto } from '../dto/req/user-self-create.req.dto';
 import { UserUpdateByAdminReqDto } from '../dto/req/user-update-by-admin.req.dto';
 import { UserResDto } from '../dto/res/user.res.dto';
+import { AdminRoleEnum } from '../enums/user-role.enum';
 import { UserPresenterService } from './user-presenter.service';
 
 @Injectable()
@@ -26,9 +30,9 @@ export class UsersService {
     public readonly userRepository: UserRepository,
     public readonly authAccessService: AuthAccessService,
     @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
     private readonly awsStorageService: AwsStorageService,
     private readonly userPresenter: UserPresenterService,
+    private readonly mailService: MailService,
   ) {}
 
   public async getUsers(
@@ -108,5 +112,28 @@ export class UsersService {
       .avatar_image;
     await this.awsStorageService.deleteFile(filePath);
     await this.userRepository.update(user.id, { avatar_image: null });
+  }
+
+  public async informManager(
+    { user }: IUserData,
+    dto: MessageToManagerReqDto,
+  ): Promise<void> {
+    const managers = await this.userRepository.find({
+      where: { role: AdminRoleEnum.MANAGER },
+    });
+    for (const manager of managers) {
+      await this.mailService.sendMail(
+        EmailTypeEnum.MESSAGE_TO_MANAGER,
+        manager.email,
+        {
+          first_name: manager.first_name,
+          last_name: manager.last_name,
+          user_id: user.id,
+          message: dto.message,
+          model: dto.model,
+          brand: dto.brand,
+        },
+      );
+    }
   }
 }

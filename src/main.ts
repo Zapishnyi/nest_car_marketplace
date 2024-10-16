@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppConfigType } from './configs/envConfigType';
 import { AppModule } from './modules/app.module';
 import { AuthService } from './modules/auth/services/auth.service';
-import { RateRepository } from './modules/repository/services/rate-repository.service';
+import { PBExchangeRateService } from './modules/pb-exchange-rate/services/pb-exchange-rate.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -60,7 +60,7 @@ async function bootstrap() {
   // Start-up of server
   await app.listen(appEnvConfig.port, async () => {
     await app.get(AuthService).adminCreate();
-    await app.get(RateRepository).updateCurrency();
+    await app.get(PBExchangeRateService).getRate();
     Logger.log(
       `Server started on: http://${appEnvConfig.host}:${appEnvConfig.port}`,
     );

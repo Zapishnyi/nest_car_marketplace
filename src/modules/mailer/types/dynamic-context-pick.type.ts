@@ -14,4 +14,8 @@ export type DynamicContextPickType = {
     TemplateContextItemsListType,
     'user_id' | 'car_id' | 'first_name' | 'last_name'
   >;
+  [EmailTypeEnum.MESSAGE_TO_MANAGER]: DynamicPickType<
+    TemplateContextItemsListType,
+    'first_name' | 'last_name' | 'user_id' | 'brand' | 'model' | 'message'
+  >;
 };

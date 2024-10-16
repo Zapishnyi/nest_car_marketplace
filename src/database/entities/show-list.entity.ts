@@ -1,12 +1,23 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
-import { BaseModel } from './base_model/base.model';
 import { CarEntity } from './car.entity';
 
 @Entity('show_list')
-export class ShowListEntity extends BaseModel {
+export class ShowListEntity {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
   @Column('text')
   car_id: string;
+
+  @CreateDateColumn()
+  created: Date;
   @ManyToOne(() => CarEntity, (entity) => entity.shows_in_list, {
     onDelete: 'CASCADE',
   })

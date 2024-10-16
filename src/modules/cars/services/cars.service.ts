@@ -22,8 +22,9 @@ import { CarReqDto } from '../dto/req/car.req.dto';
 import { CarImageQueryReqDto } from '../dto/req/car-image-type-query.req.dto';
 import { CarQueryReqDto } from '../dto/req/car-query.req.dto';
 import { CarUpdateReqDto } from '../dto/req/car-update.req.dto';
+import { CarsQueryReqDto } from '../dto/req/cars-query.req.dto';
 import { ICarData } from '../interfaces/ICarData.interface';
-import { ICarRaw } from '../interfaces/ICarRaw.interface';
+import { ICarWithTotalRaw } from '../interfaces/ICarWithTotalRaw.interface';
 
 @Injectable()
 export class CarsService {
@@ -61,8 +62,14 @@ export class CarsService {
     );
   }
 
-  public async search(query: CarQueryReqDto): Promise<[ICarRaw[], number]> {
+  public async search(
+    query: CarsQueryReqDto,
+  ): Promise<[ICarWithTotalRaw[], number]> {
     return await this.carRepository.search(query);
+  }
+
+  public async getCar(car_id: string, query: CarQueryReqDto): Promise<any> {
+    return await this.carRepository.getCar(car_id, query);
   }
 
   public async delete({ car }: ICarData): Promise<void> {
@@ -94,7 +101,7 @@ export class CarsService {
       where: { id: car.id },
       relations: ['brand', 'model', 'location'],
     });
-    if (!updateResult.active && updateResult.version > 3) {
+    if (!updateResult.active && updateResult.version > 2) {
       const managers = await this.userRepository.find({
         where: { role: AdminRoleEnum.MANAGER },
       });

@@ -3,8 +3,10 @@ import { DataSource, Repository } from 'typeorm';
 
 import { CarEntity } from '../../../database/entities/car.entity';
 import { CarQueryReqDto } from '../../cars/dto/req/car-query.req.dto';
+import { CarsQueryReqDto } from '../../cars/dto/req/cars-query.req.dto';
 import { CurrencyEnum } from '../../cars/enums/currency.enum';
-import { ICarRaw } from '../../cars/interfaces/ICarRaw.interface';
+import { ICarWithTotalRaw } from '../../cars/interfaces/ICarWithTotalRaw.interface';
+import { ShowChosenRepository } from './show-chosen-repository.service';
 import { ShowListRepository } from './show-list-repository.service';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class CarRepository extends Repository<CarEntity> {
   constructor(
     private readonly dataSource: DataSource,
     private readonly showListRepository: ShowListRepository,
+    private readonly showChosenRepository: ShowChosenRepository,
   ) {
     super(CarEntity, dataSource.manager);
   }
@@ -30,20 +33,13 @@ export class CarRepository extends Repository<CarEntity> {
     mileage_min,
     currency,
     model,
-  }: CarQueryReqDto): Promise<[ICarRaw[], number]> {
+  }: CarsQueryReqDto): Promise<[ICarWithTotalRaw[], number]> {
     try {
-      // .distinct(true)
-      //   .leftJoinAndSelect('car.rate', 'rate')
-      //   .leftJoinAndSelect('car.brand', 'brand')
-      //   .leftJoinAndSelect('car.model', 'model');
-      // console.log(await testQuery.getMany());
       const subQuery = this.createQueryBuilder('car')
-        // .distinct(true)
         .leftJoinAndSelect('car.rate', 'rate')
         .leftJoinAndSelect('car.brand', 'brand')
         .leftJoinAndSelect('car.model', 'model')
         .andWhere('active IS TRUE');
-
       switch (currency) {
         case CurrencyEnum.UAH:
           subQuery
@@ -177,7 +173,7 @@ export class CarRepository extends Repository<CarEntity> {
         });
       }
 
-      const carsToGetTotal: ICarRaw[] = await queryResult
+      const carsToGetTotal: ICarWithTotalRaw[] = await queryResult
         .limit(1)
         .offset(0)
         .getRawMany();
@@ -195,6 +191,83 @@ export class CarRepository extends Repository<CarEntity> {
         ),
       );
       return [cars, total];
+    } catch (err) {
+      throw new Error(err);
+    }
+  }
+
+  public async getCar(
+    car_id: string,
+    { currency }: CarQueryReqDto,
+  ): Promise<any> {
+    try {
+      const result = this.createQueryBuilder('car')
+        .leftJoinAndSelect('car.rate', 'rate')
+        .leftJoinAndSelect('car.brand', 'brand')
+        .leftJoinAndSelect('car.model', 'model')
+        .leftJoinAndSelect('car.location', 'location')
+        .leftJoinAndSelect('car.user', 'user')
+        .andWhere('active IS TRUE')
+        .andWhere('car.id = :car_id', { car_id: `${car_id}` });
+
+      switch (currency) {
+        case CurrencyEnum.UAH:
+          result
+            .addSelect(
+              `CASE
+          WHEN car.currency = 'UAH' 
+          THEN car.price
+          
+          WHEN car.currency = 'USD' 
+          THEN car.price * rate.sale_usd
+          
+          WHEN car.currency = 'EUR' 
+          THEN car.price * rate.sale_eur
+          END`,
+              `car_price_calculated`,
+            )
+            .addSelect(`'UAH'`, 'car_currency_final');
+          break;
+        case CurrencyEnum.USD:
+          result
+            .addSelect(
+              `CASE
+          WHEN car.currency = 'UAH' 
+          THEN car.price * rate.buy_usd
+          
+          WHEN car.currency = 'USD' 
+          THEN car.price
+          
+          WHEN car.currency = 'EUR' 
+          THEN car.price * rate.sale_eur / rate.buy_usd
+          END`,
+              `car_price_calculated`,
+            )
+            .addSelect(`'USD'`, 'car_currency_final');
+          break;
+        case CurrencyEnum.EUR:
+          result
+            .addSelect(
+              `CASE
+          WHEN car.currency = 'UAH' 
+          THEN car.price * rate.buy_eur
+          
+          WHEN car.currency = 'USD' 
+          THEN car.price * rate.sale_usd / rate.buy_eur
+          
+          WHEN car.currency = 'EUR' 
+          THEN car.price
+          END`,
+              `car_price_calculated`,
+            )
+            .addSelect(`'EUR'`, 'car_currency_final');
+          break;
+      }
+      const car = await result.getRawOne();
+      await this.showChosenRepository.save(
+        this.showChosenRepository.create({ car_id }),
+      );
+      return car;
     } catch (err) {
       throw new Error(err);
     }

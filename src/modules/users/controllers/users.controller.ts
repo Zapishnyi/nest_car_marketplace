@@ -15,6 +15,7 @@ import {
   ApiConsumes,
   ApiForbiddenResponse,
   ApiNoContentResponse,
+  ApiOperation,
   ApiPayloadTooLargeResponse,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -26,6 +27,7 @@ import { FileLimitation } from '../../../common/custom_decorators/file-limitatio
 import { GetStoredUserDataFromResponse } from '../../../common/custom_decorators/get-stored-user-data-from-response.decorator';
 import { JwtAccessGuard } from '../../../common/guards/jwt-access.guard';
 import { IUserData } from '../../auth/interfaces/IUserData';
+import { MessageToManagerReqDto } from '../dto/req/message-to-manager.req.dto';
 import { UserSelfUpdateReqDto } from '../dto/req/user-self-update.req.dto';
 import { UserResDto } from '../dto/res/user.res.dto';
 import { UserPresenterService } from '../services/user-presenter.service';
@@ -116,5 +118,22 @@ export class UsersController {
     @GetStoredUserDataFromResponse() userData: IUserData,
   ): Promise<void> {
     await this.usersService.deleteAvatar(userData);
+  }
+
+  @UseGuards(JwtAccessGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({ description: 'Message sent successfully' })
+  @ApiBearerAuth()
+  @Post('message')
+  @ApiOperation({
+    summary: 'Send message to managers',
+    description: 'Send message to managers.',
+  })
+  public async informManager(
+    @GetStoredUserDataFromResponse()
+    userData: IUserData,
+    @Body() dto: MessageToManagerReqDto,
+  ): Promise<void> {
+    await this.usersService.informManager(userData, dto);
   }
 }

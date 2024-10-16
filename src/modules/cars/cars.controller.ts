@@ -49,6 +49,7 @@ import { CarReqDto } from './dto/req/car.req.dto';
 import { CarImageQueryReqDto } from './dto/req/car-image-type-query.req.dto';
 import { CarQueryReqDto } from './dto/req/car-query.req.dto';
 import { CarUpdateReqDto } from './dto/req/car-update.req.dto';
+import { CarsQueryReqDto } from './dto/req/cars-query.req.dto';
 import { CarResDto } from './dto/res/car.res.dto';
 import { CarCreateResDto } from './dto/res/car-create.res.dto';
 import { CarListResDto } from './dto/res/car-list.res.dto';
@@ -75,10 +76,38 @@ export class CarsController {
   })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @Get()
-  public async search(@Query() query: CarQueryReqDto): Promise<CarListResDto> {
+  public async search(@Query() query: CarsQueryReqDto): Promise<CarListResDto> {
     return this.carPresenter.toResponseListDto(
       await this.carsService.search(query),
       query,
+    );
+  }
+
+  @ApiNotFoundResponse({
+    example: {
+      statusCode: 404,
+      messages: 'Car does not exist',
+      timestamp: '2024-09-29T16:44:02.125Z',
+      path: '/car/:car_id',
+    },
+  })
+  @ApiConflictResponse({
+    example: {
+      statusCode: 409,
+      messages:
+        'invalid input syntax for type uuid: "248784cb-0c61-4fba-92b3-cdf0077c266r"',
+      timestamp: '2024-09-29T16:47:36.137Z',
+      path: '/car/:car_id',
+    },
+  })
+  @ApiForbiddenResponse({ description: 'Forbidden' })
+  @Get(':car_id')
+  public async getCar(
+    @Param('car_id', ParseUUIDPipe) car_id: string,
+    @Query() query: CarQueryReqDto,
+  ): Promise<CarResDto> {
+    return this.carPresenter.RawToResponseDto(
+      await this.carsService.getCar(car_id, query),
     );
   }
 

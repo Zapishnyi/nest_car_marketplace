@@ -1,7 +1,7 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 
 import { LocationEntity } from '../../../database/entities/location.entity';
-import { LocationRepositoryService } from '../../repository/services/location-repository.service';
+import { LocationRepository } from '../../repository/services/location-repository.service';
 import { LocationDeleteQueryReqDto } from '../dto/req/location-delete-query.req.dto';
 import { LocationListReqDto } from '../dto/req/location-list.req.dto';
 import { LocationQueryReqDto } from '../dto/req/location-query.req.dto';
@@ -11,7 +11,7 @@ import { LocationPresenterService } from './location-presenter.service';
 @Injectable()
 export class LocationService {
   constructor(
-    public readonly locationRepository: LocationRepositoryService,
+    public readonly locationRepository: LocationRepository,
     public readonly locationPresenter: LocationPresenterService,
   ) {}
 

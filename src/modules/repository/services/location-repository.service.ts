@@ -4,7 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { LocationEntity } from '../../../database/entities/location.entity';
 
 @Injectable()
-export class LocationRepositoryService extends Repository<LocationEntity> {
+export class LocationRepository extends Repository<LocationEntity> {
   constructor(private readonly dataSource: DataSource) {
     super(LocationEntity, dataSource.manager);
   }
