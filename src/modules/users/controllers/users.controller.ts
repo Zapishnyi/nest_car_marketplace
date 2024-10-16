@@ -30,16 +30,12 @@ import { IUserData } from '../../auth/interfaces/IUserData';
 import { MessageToManagerReqDto } from '../dto/req/message-to-manager.req.dto';
 import { UserSelfUpdateReqDto } from '../dto/req/user-self-update.req.dto';
 import { UserResDto } from '../dto/res/user.res.dto';
-import { UserPresenterService } from '../services/user-presenter.service';
 import { UsersService } from '../services/users.service';
 
 @ApiTags('4.User')
 @Controller('user')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly userPresenter: UserPresenterService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @ApiBearerAuth()
   @ApiUnauthorizedResponse({
