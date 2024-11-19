@@ -1,0 +1,61 @@
+services:
+  nest-app:
+    container_name: nest-app-container
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000' # Map port 3000 of the container to port 3000 on the host
+    env_file:
+      - ./back/environments/local.env
+
+    volumes:
+      - ./back:/app_nest # Sync project directory to container
+      - /app_nest/node_modules # Ignore node_modules on the host
+    restart: on-failure
+    command: npm run start:local # Run the NestJS app
+
+  db-local-postgres:
+    container_name: postgres_container
+    image: postgres:16.1
+    env_file:
+      - .env
+    ports:
+      #      - '${POSTGRES_PORT:-5435}:5435'
+      - '${POSTGRES_PORT:-5435}:5432'
+    environment:
+      POSTGRES_USER: '${POSTGRES_USER:-user}'
+      POSTGRES_PASSWORD: '${POSTGRES_PASSWORD:-password}'
+      POSTGRES_DB: '${POSTGRES_DB:-nest-hw-db}'
+    volumes:
+      - ./db-local-postgres:/var/lib/postgresql/nest-hw-db
+
+  db-local-redis:
+    container_name: redis_container
+    image: redis:7.2.3
+    env_file:
+      - .env
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    command: >
+      --requirepass '${REDIS_PASSWORD:-redispass}'
+    restart: on-failure
+
+  db-local-aws-s3:
+    container_name: aws_container
+    image: quay.io/minio/minio:latest
+    command: server /data --console-address ":9001"
+    restart: on-failure
+    ports:
+      - "8000:9000"
+      - "8001:9001"
+    volumes:
+      - ./db-local-aws-s3:/usr/src/app/s3
+    environment:
+      - MINIO_ROOT_USER=user            # AWS_S3_ACCESS_KEY
+      - MINIO_ROOT_PASSWORD=password    # AWS_S3_SECRET_KEY
+
+volumes:
+  db-local-postgres:
+  db-local-aws-s3:
+
