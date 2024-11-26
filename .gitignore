@@ -11,3 +11,5 @@
 /back/dist/*
 /back/dist/**
 /back/node_modules/
+/back/node_modules/*
+/back/node_modules/**
