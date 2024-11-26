@@ -1,1 +1,7 @@
 
+/.idea/
+/assignment/
+/db-local-aws-s3/
+/db-local-postgres/
+/back/dist/
+/back/node_modules/
