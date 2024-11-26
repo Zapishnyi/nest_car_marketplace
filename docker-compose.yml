@@ -4,11 +4,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - '3000:3000' # Map port 3000 of the container to port 3000 on the host
+
     env_file:
       - ./back/environments/local.env
-
+    ports:
+      - '${APP_PORT:-3000}:3000' # Map port 3000 of the container to port 3000 on the host
     volumes:
       - ./back:/app_nest # Sync project directory to container
       - /app_nest/node_modules # Ignore node_modules on the host
@@ -21,7 +21,6 @@ services:
     env_file:
       - .env
     ports:
-      #      - '${POSTGRES_PORT:-5435}:5435'
       - '${POSTGRES_PORT:-5435}:5432'
     environment:
       POSTGRES_USER: '${POSTGRES_USER:-user}'
@@ -36,7 +35,7 @@ services:
     env_file:
       - .env
     ports:
-      - '${REDIS_PORT:-6379}:6379'
+      - '${REDIS_PORT:-6380}:6379'
     command: >
       --requirepass '${REDIS_PASSWORD:-redispass}'
     restart: on-failure
